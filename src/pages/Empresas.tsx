@@ -16,6 +16,11 @@ const Empresas = () => {
   const [contato, setContato] = useState("");
   const { toast } = useToast();
 
+  // Veículos dialog
+  const [veiculosDialogOpen, setVeiculosDialogOpen] = useState(false);
+  const [selectedEmpresa, setSelectedEmpresa] = useState<any>(null);
+  const [empresaVeiculos, setEmpresaVeiculos] = useState<any[]>([]);
+
   const fetchEmpresas = async () => {
     const { data } = await supabase.from("empresas").select("*, veiculos(id)").order("created_at", { ascending: false });
     setEmpresas(data || []);
@@ -27,6 +32,13 @@ const Empresas = () => {
     const { error } = await supabase.from("empresas").insert({ nome, cnpj: cnpj || null, contato: contato || null });
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
     else { toast({ title: "Empresa cadastrada!" }); setDialogOpen(false); setNome(""); setCnpj(""); setContato(""); fetchEmpresas(); }
+  };
+
+  const openVeiculosDialog = async (empresa: any) => {
+    setSelectedEmpresa(empresa);
+    const { data } = await supabase.from("veiculos").select("id, placa, modelo").eq("empresa_id", empresa.id).order("placa");
+    setEmpresaVeiculos(data || []);
+    setVeiculosDialogOpen(true);
   };
 
   const filtered = empresas.filter((e) => e.nome.toLowerCase().includes(search.toLowerCase()));
@@ -71,13 +83,37 @@ const Empresas = () => {
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">{e.contato || "Sem contato"}</span>
-              <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full">{(e.veiculos as any[])?.length || 0} veículos</span>
+              <button
+                onClick={() => openVeiculosDialog(e)}
+                className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full hover:bg-secondary/80 transition-colors cursor-pointer"
+              >
+                {(e.veiculos as any[])?.length || 0} veículos
+              </button>
             </div>
           </div>
         )) : (
           <p className="text-sm text-muted-foreground col-span-full text-center py-8">Nenhuma empresa cadastrada.</p>
         )}
       </div>
+
+      {/* Veículos da empresa dialog */}
+      <Dialog open={veiculosDialogOpen} onOpenChange={setVeiculosDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Veículos — {selectedEmpresa?.nome}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 mt-2">
+            {empresaVeiculos.length > 0 ? empresaVeiculos.map((v) => (
+              <div key={v.id} className="flex items-center justify-between bg-muted/50 rounded-lg px-3 py-2">
+                <span className="font-mono font-bold text-foreground">{v.placa}</span>
+                <span className="text-xs text-muted-foreground">{v.modelo || "—"}</span>
+              </div>
+            )) : (
+              <p className="text-sm text-muted-foreground text-center py-4">Nenhum veículo vinculado.</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
