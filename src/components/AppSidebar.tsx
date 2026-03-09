@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, ClipboardList, Package, Car, Building2, Users, Wrench,
-  Tag, Box, FileText, Search, Settings, Radio, ShieldCheck, Signal,
+  Tag, Box, FileText, Search, Settings, ShieldCheck, Signal,
   BarChart3, ChevronDown, Bot,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -97,9 +97,6 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="sidebar-gradient border-r border-sidebar-border">
       <div className="p-4 flex items-center gap-3 border-b border-sidebar-border">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-          <Radio className="w-4 h-4 text-primary-foreground" />
-        </div>
         {!collapsed && (
           <span className="text-lg font-bold text-sidebar-accent-foreground tracking-tight">Telig</span>
         )}
